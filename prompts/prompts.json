@@ -1,0 +1,44 @@
+[
+  {
+    "id": "cls-001",
+    "category": "classification",
+    "prompt": "Classify the sentiment of this review as exactly one word: positive, negative, or neutral.\n\nReview: The battery lasts two days and the screen is gorgeous.",
+    "expected": "positive",
+    "check": "exact_match"
+  },
+  {
+    "id": "cls-002",
+    "category": "classification",
+    "prompt": "Classify the sentiment of this review as exactly one word: positive, negative, or neutral.\n\nReview: It stopped working after a week and support never replied.",
+    "expected": "negative",
+    "check": "exact_match"
+  },
+  {
+    "id": "json-001",
+    "category": "json_extraction",
+    "prompt": "Extract the data as JSON with keys name (string) and age (integer). Return only the JSON, no other text.\n\nText: Priya is 34 years old and lives in Pune.",
+    "expected": {"name": "Priya", "age": 34},
+    "check": "json_equals"
+  },
+  {
+    "id": "json-002",
+    "category": "json_extraction",
+    "prompt": "Extract the data as JSON with keys name (string) and age (integer). Return only the JSON, no other text.\n\nText: Marco, aged 29, works as a chef.",
+    "expected": {"name": "Marco", "age": 29},
+    "check": "json_equals"
+  },
+  {
+    "id": "math-001",
+    "category": "reasoning",
+    "prompt": "A train travels 60 km in 45 minutes. What is its average speed in km/h? Answer with the number only.",
+    "expected": "80",
+    "check": "exact_match"
+  },
+  {
+    "id": "math-002",
+    "category": "reasoning",
+    "prompt": "A notebook costs 3 euros and a pen costs 2 euros. What is the total cost of 4 notebooks and 5 pens? Answer with the number only.",
+    "expected": "22",
+    "check": "exact_match"
+  }
+]
