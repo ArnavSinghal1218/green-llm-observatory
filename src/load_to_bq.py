@@ -27,6 +27,9 @@ SCHEMA = [
     bigquery.SchemaField("total_tokens", "INTEGER"),
     bigquery.SchemaField("attempts", "INTEGER"),
     bigquery.SchemaField("error", "STRING"),
+    bigquery.SchemaField("harness_version", "STRING"),
+    bigquery.SchemaField("language", "STRING"),
+    bigquery.SchemaField("pair_id", "STRING"),
 ]
 
 

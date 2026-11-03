@@ -12,12 +12,15 @@ from google.genai import types
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
-PROMPTS_FILE = ROOT / "prompts" / "prompts.json"
+PROMPT_FILES = [ ROOT / "prompts" / "prompts.json",
+                ROOT / "prompts" / "prompts_multilingual.json",]
+
 MODELS_FILE = ROOT / "config" / "models.json"
 RESULTS_DIR = ROOT / "results"
 
 MAX_ATTEMPTS = 3
-RETRYABLE = ("429", "500", "503")
+RETRYABLE_CODES = {429, 500, 503, 504}
+HARNESS_VERSION = "1.4"
 REPEATS = 3
 TEMPERATURE = 0
 
@@ -57,9 +60,16 @@ def call_model(model, prompt):
         except Exception as e:
             last_error = str(e)[:300]
             latency = round(time.time() - start, 3)
-            if attempt == MAX_ATTEMPTS or not any(c in last_error for c in RETRYABLE):
+            code = getattr(e, "code", None)
+            if attempt == MAX_ATTEMPTS or code not in RETRYABLE_CODES:
                 break
             time.sleep(2 ** attempt)
+        #except Exception as e:
+        #    last_error = str(e)[:300]
+        #    latency = round(time.time() - start, 3)
+        #    if attempt == MAX_ATTEMPTS or not any(c in last_error for c in RETRYABLE):
+        #        break
+        #    time.sleep(2 ** attempt)
     return {
         "output": "",
         "latency_s": latency,
@@ -101,7 +111,10 @@ def check_answer(item, output):
 
 
 def main():
-    prompts = json.loads(PROMPTS_FILE.read_text(encoding="utf-8"))
+    # prompts = json.loads(PROMPTS_FILE.read_text(encoding="utf-8"))
+    prompts = []
+    for pf in PROMPT_FILES:
+        prompts += json.loads(pf.read_text(encoding="utf-8"))
     models = json.loads(MODELS_FILE.read_text(encoding="utf-8"))
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -121,10 +134,13 @@ def main():
                         "run_id": run_id,
                         "repeat": repeat,
                         "temperature": TEMPERATURE,
+                        "harness_version": HARNESS_VERSION,
                         "timestamp": datetime.now(timezone.utc).isoformat(),
                         "model": model,
                         "prompt_id": item["id"],
                         "category": item["category"],
+                        "language": item.get("language", "en"),
+                        "pair_id": item.get("pair_id", item["id"]),
                         "correct": strict,
                         "lenient_correct": lenient,
                         **res,
