@@ -21,7 +21,7 @@ RESULTS_DIR = ROOT / "results"
 
 MAX_ATTEMPTS = 3
 RETRYABLE_CODES = {429, 500, 503, 504}
-HARNESS_VERSION = "1.5"
+HARNESS_VERSION = "1.6"
 REPEATS = 3
 TEMPERATURE = 0
 
@@ -64,7 +64,7 @@ def call_model(model, prompt):
             code = getattr(e, "code", None)
             if attempt == MAX_ATTEMPTS or code not in RETRYABLE_CODES:
                 break
-            time.sleep(2 ** attempt)
+            time.sleep(15 if code == 429 else 2 ** attempt)
         #except Exception as e:
         #    last_error = str(e)[:300]
         #    latency = round(time.time() - start, 3)
