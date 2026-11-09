@@ -14,14 +14,15 @@ load_dotenv()
 ROOT = Path(__file__).resolve().parent.parent
 PROMPT_FILES = [ ROOT / "prompts" / "prompts.json",
                 ROOT / "prompts" / "prompts_multilingual.json",
-                ROOT / "prompts" / "prompts_hard.json",]
+                ROOT / "prompts" / "prompts_hard.json",
+                ROOT / "prompts" / "prompts_hard2.json",]
 
 MODELS_FILE = ROOT / "config" / "models.json"
 RESULTS_DIR = ROOT / "results"
 
 MAX_ATTEMPTS = 3
 RETRYABLE_CODES = {429, 500, 503, 504}
-HARNESS_VERSION = "1.6"
+HARNESS_VERSION = "1.7"
 REPEATS = 3
 TEMPERATURE = 0
 
@@ -93,18 +94,38 @@ def parse_json_lenient(text):
     return data
 
 
+def last_number(text):
+    nums = re.findall(r"-?\d+(?:\.\d+)?", text)
+    return nums[-1] if nums else None
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
 def check_answer(item, output):
     """Return (strict_correct, lenient_correct)."""
-    if item["check"] == "exact_match":
-        ok = output.strip().strip(".").lower() == str(item["expected"]).lower()
-        return ok, ok
-    if item["check"] == "max_words":
+    kind = item["check"]
+    if kind == "exact_match":
+        strict = output.strip().strip(".").lower() == str(item["expected"]).lower()
+        lenient = strict
+        if not strict and is_number(str(item["expected"])):
+            lenient = last_number(output) == str(item["expected"])
+        return strict, lenient
+    if kind == "max_words":
         ok = len(output.split()) <= item["expected"]
         return ok, ok
-    if item["check"] == "regex_match":
+    if kind == "exact_words":
+        ok = len(output.split()) == item["expected"]
+        return ok, ok
+    if kind == "regex_match":
         ok = re.fullmatch(item["expected"], output.strip()) is not None
         return ok, ok
-    if item["check"] == "json_equals":
+    if kind == "json_equals":
         try:
             strict = json.loads(output) == item["expected"]
         except json.JSONDecodeError:
@@ -115,6 +136,30 @@ def check_answer(item, output):
             lenient = False
         return strict, lenient
     return False, False
+
+
+#def check_answer(item, output):
+#    """Return (strict_correct, lenient_correct)."""
+#    if item["check"] == "exact_match":
+#        ok = output.strip().strip(".").lower() == str(item["expected"]).lower()
+#        return ok, ok
+#    if item["check"] == "max_words":
+#        ok = len(output.split()) <= item["expected"]
+#        return ok, ok
+#    if item["check"] == "regex_match":
+#        ok = re.fullmatch(item["expected"], output.strip()) is not None
+#        return ok, ok
+#    if item["check"] == "json_equals":
+#        try:
+#            strict = json.loads(output) == item["expected"]
+#        except json.JSONDecodeError:
+#            strict = False
+#        try:
+#            lenient = parse_json_lenient(output) == item["expected"]
+#        except json.JSONDecodeError:
+#            lenient = False
+#        return strict, lenient
+#    return False, False
 
 
 def main():
