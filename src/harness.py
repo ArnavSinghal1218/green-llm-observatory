@@ -13,14 +13,15 @@ load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
 PROMPT_FILES = [ ROOT / "prompts" / "prompts.json",
-                ROOT / "prompts" / "prompts_multilingual.json",]
+                ROOT / "prompts" / "prompts_multilingual.json",
+                ROOT / "prompts" / "prompts_hard.json",]
 
 MODELS_FILE = ROOT / "config" / "models.json"
 RESULTS_DIR = ROOT / "results"
 
 MAX_ATTEMPTS = 3
 RETRYABLE_CODES = {429, 500, 503, 504}
-HARNESS_VERSION = "1.4"
+HARNESS_VERSION = "1.5"
 REPEATS = 3
 TEMPERATURE = 0
 
@@ -96,6 +97,12 @@ def check_answer(item, output):
     """Return (strict_correct, lenient_correct)."""
     if item["check"] == "exact_match":
         ok = output.strip().strip(".").lower() == str(item["expected"]).lower()
+        return ok, ok
+    if item["check"] == "max_words":
+        ok = len(output.split()) <= item["expected"]
+        return ok, ok
+    if item["check"] == "regex_match":
+        ok = re.fullmatch(item["expected"], output.strip()) is not None
         return ok, ok
     if item["check"] == "json_equals":
         try:
