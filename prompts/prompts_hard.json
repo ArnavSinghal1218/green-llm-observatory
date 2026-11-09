@@ -1,0 +1,20 @@
+[
+  {"id": "if-001", "category": "instruction_following",
+   "prompt": "Write a one-line slogan for a bicycle shop in at most 8 words. Output only the slogan.",
+   "expected": 8, "check": "max_words"},
+  {"id": "if-002", "category": "instruction_following",
+   "prompt": "List exactly 4 fruits, one per line, with no numbering, no bullets and no other text.",
+   "expected": "[A-Za-z ]+(\\n[A-Za-z ]+){3}", "check": "regex_match"},
+  {"id": "if-003", "category": "instruction_following",
+   "prompt": "Reply with the word yes in uppercase letters and nothing else.",
+   "expected": "YES", "check": "regex_match"},
+  {"id": "math-003", "category": "reasoning",
+   "prompt": "A shop sells pens only in full packs of 6 for 4 euros per pack. How much do 30 pens cost? Answer with the number only.",
+   "expected": "20", "check": "exact_match"},
+  {"id": "math-004", "category": "reasoning",
+   "prompt": "Tom is twice as old as Sara. In 5 years the sum of their ages will be 46. How old is Tom now? Answer with the number only.",
+   "expected": "24", "check": "exact_match"},
+  {"id": "math-005", "category": "reasoning",
+   "prompt": "How many times does the letter r appear in the word strawberry? Answer with the number only.",
+   "expected": "3", "check": "exact_match"}
+]
