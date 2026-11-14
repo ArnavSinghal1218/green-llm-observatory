@@ -1,10 +1,11 @@
 import sys
 from pathlib import Path
-
+import os
 from google.cloud import bigquery
 
 PROJECT = "green-llm-observatory"
-TABLE = f"{PROJECT}.observatory.responses"
+#TABLE = f"{PROJECT}.observatory.responses"
+TABLE = os.environ.get("BQ_TABLE", f"{PROJECT}.observatory.responses")
 LOCATION = "EU"
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 

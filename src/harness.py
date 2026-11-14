@@ -18,16 +18,19 @@ PROMPT_FILES = [ ROOT / "prompts" / "prompts.json",
                 ROOT / "prompts" / "prompts_hard2.json",]
 
 MODELS_FILE = ROOT / "config" / "models.json"
-RESULTS_DIR = ROOT / "results"
+#RESULTS_DIR = ROOT / "results"
+RESULTS_DIR = Path(os.environ.get("RESULTS_DIR", ROOT / "results"))
+PROMPT_LIMIT = int(os.environ.get("PROMPT_LIMIT", "0"))
 
 MAX_ATTEMPTS = 3
 RETRYABLE_CODES = {429, 500, 503, 504}
-HARNESS_VERSION = "1.7"
-REPEATS = 3
+HARNESS_VERSION = "1.8"
+#REPEATS = 3
+REPEATS = int(os.environ.get("REPEATS", "3"))
 TEMPERATURE = 0
 
 client = genai.Client(
-    api_key=os.environ["GEMINI_API_KEY"],
+    api_key=os.environ["GEMINI_API_KEY"].strip(),
     http_options=types.HttpOptions(
         timeout=60000,
         retry_options=types.HttpRetryOptions(attempts=1),
@@ -167,6 +170,8 @@ def main():
     prompts = []
     for pf in PROMPT_FILES:
         prompts += json.loads(pf.read_text(encoding="utf-8"))
+    if PROMPT_LIMIT:
+        prompts = prompts[:PROMPT_LIMIT]
     models = json.loads(MODELS_FILE.read_text(encoding="utf-8"))
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -205,6 +210,7 @@ def main():
                     time.sleep(2)
 
     print(f"\nSaved: {out_path}")
+    return out_path
 
 
 if __name__ == "__main__":
